@@ -1,2 +1,2 @@
 # BlazorChatWorkshop
-Simple chat for Blazor Workshop
+Simple chat project for Blazor Workshop
