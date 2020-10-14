@@ -1,0 +1,79 @@
+﻿@page "/chat"
+@using BlazorChat.ViewModels
+@using BlasorChat.Models
+@inject HttpClient Http
+@inject UserContainer User
+
+<h1>Chat</h1>
+
+@if (messages == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <span class="oi oi-loop-circular" aria-hidden="true" @onclick="Refresh"></span>
+
+    <div>
+        <h3>Name</h3>
+        <span class="text-nowrap">
+            <input @bind="User.Name" @bind:event="oninput" />
+            @if (string.IsNullOrEmpty(User.Name))
+            {
+                <span>*</span>
+            }
+        </span>
+    </div>
+
+    <div>
+        <hr />
+        @foreach (var message in messages.Reverse())
+        {
+            <div>
+                <h3>@message.Text</h3>
+                <span class="text-nowrap">
+                    From: @message.Name, @message.Date.ToLocalTime()
+                </span>
+                <hr />
+            </div>
+        }
+    </div>
+
+    <input @bind="newMessage" @bind:event="oninput" @onkeypress="KeyPress" />
+}
+
+@code {
+    private MessageViewModel[] messages;
+    private string newMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMessages();
+    }
+
+    private async Task LoadMessages()
+    {
+        var messagesModel = await Http.GetFromJsonAsync<Message[]>("https://api-dot-blazor-chat.ew.r.appspot.com/chat");
+        messages = messagesModel.Select(m => { MessageViewModel result = m; return result; }).ToArray();
+    }
+
+    private async Task Refresh(MouseEventArgs e)
+    {
+        await LoadMessages();
+    }
+
+    private async Task KeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrEmpty(newMessage) && !string.IsNullOrEmpty(User.Name))
+        {
+            await SendMessage(newMessage, User.Name);
+            newMessage = "";
+        }
+    }
+
+    private async Task SendMessage(string message, string name)
+    {
+        await Http.PutAsJsonAsync<Message>("https://api-dot-blazor-chat.ew.r.appspot.com/chat", new Message() { Text = message, Name = name });
+        await LoadMessages();
+    }
+}
