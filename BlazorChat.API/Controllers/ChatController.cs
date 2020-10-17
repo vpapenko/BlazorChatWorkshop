@@ -10,23 +10,23 @@ using Microsoft.Extensions.Logging;
 namespace BlasorChat.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ChatController : ControllerBase
     {
         private readonly ILogger<ChatController> _logger;
-        private readonly FirestoreService _firestoreService;
+        private readonly IDbService _dbService;
 
-        public ChatController(ILogger<ChatController> logger, FirestoreService firestoreService)
+        public ChatController(ILogger<ChatController> logger, IDbService dbService)
         {
             _logger = logger;
-            _firestoreService = firestoreService;
+            _dbService = dbService;
         }
 
         [HttpGet]
         public async Task<IEnumerable<Message>> Get()
         {
-            var maxMessages = int.Parse(Environment.GetEnvironmentVariable("MAX_MESSAGES"));
-            var messageDictionary = await _firestoreService.GetMessages(maxMessages);
+            var maxMessages = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MAX_MESSAGES")) ? 5 : int.Parse(Environment.GetEnvironmentVariable("MAX_MESSAGES"));
+            var messageDictionary = await _dbService.GetMessages(maxMessages);
             var messages = messageDictionary.Select(m => new Message()
             {
                 Text = (string)m["text"],
@@ -47,7 +47,7 @@ namespace BlasorChat.API.Controllers
             {
                 throw new ArgumentNullException(nameof(message.Name));
             }
-            await _firestoreService.SaveMessage(message.Text, message.Name, DateTime.UtcNow);
+            await _dbService.SaveMessage(message.Text, message.Name, DateTime.UtcNow);
         }
     }
 }

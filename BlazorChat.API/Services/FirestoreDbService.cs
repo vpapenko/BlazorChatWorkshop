@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace BlazorChat.API.Services
 {
-    public class FirestoreService
+    public class FirestoreDbService : IDbService
     {
         private readonly FirestoreDb _db;
 
-        public FirestoreService()
+        public FirestoreDbService()
         {
             var projectId = Environment.GetEnvironmentVariable("PROJECT_ID");
             _db = FirestoreDb.Create(projectId);
