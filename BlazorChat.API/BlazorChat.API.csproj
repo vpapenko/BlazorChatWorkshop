@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlasorChat.Models\BlasorChat.Models.csproj" />
-    <ProjectReference Include="..\BlazorChat.Client\BlazorChat.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

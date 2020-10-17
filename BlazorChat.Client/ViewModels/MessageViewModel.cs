@@ -21,12 +21,12 @@ namespace BlazorChat.ViewModels
 
         public async Task LoadMessages()
         {
-            Messages = await _httpClient.GetFromJsonAsync<Message[]>("https://localhost:5001/api/chat");
+            Messages = await _httpClient.GetFromJsonAsync<Message[]>("https://blazor-chat.ew.r.appspot.com/api/chat");
         }
 
         public async Task SendMessage(string message, string name)
         {
-            await _httpClient.PutAsJsonAsync<Message>("https://localhost:5001/api/chat", new Message() { Text = message, Name = name });
+            await _httpClient.PutAsJsonAsync<Message>("https://blazor-chat.ew.r.appspot.com/api/chat", new Message() { Text = message, Name = name });
             await LoadMessages();
         }
     }
