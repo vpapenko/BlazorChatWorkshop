@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BlazorChat.ViewModels
 {
-    public class UserContainer
+    public class UserViewModel
     {
         public string Name { get; set; }
     }

@@ -2,24 +2,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace BlazorChat.ViewModels
 {
     public class MessageViewModel
     {
-        public string Text { get; set; }
-        public string Name { get; set; }
-        public DateTime Date { get; set; }
-
-        public static implicit operator MessageViewModel(Message message)
+        public MessageViewModel(HttpClient httpClient)
         {
-            return new MessageViewModel()
-            {
-                Text = message.Text,
-                Name = message.Name,
-                Date = message.Date
-            };
+            _httpClient = httpClient;
+        }
+
+        private readonly HttpClient _httpClient;
+        public IEnumerable<Message> Messages;
+
+
+        public async Task LoadMessages()
+        {
+            Messages = await _httpClient.GetFromJsonAsync<Message[]>("https://localhost:5001/api/chat");
+        }
+
+        public async Task SendMessage(string message, string name)
+        {
+            await _httpClient.PutAsJsonAsync<Message>("https://localhost:5001/api/chat", new Message() { Text = message, Name = name });
+            await LoadMessages();
         }
     }
 }

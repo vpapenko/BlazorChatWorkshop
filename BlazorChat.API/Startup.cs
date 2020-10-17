@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using BlazorChat.API.Services;
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -18,17 +20,26 @@ namespace BlasorChat.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            HostingEnvironment = environment;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment HostingEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(new FirestoreService());
+            if (HostingEnvironment.IsProduction())
+            {
+                services.AddSingleton<IDbService>(new FirestoreDbService());
+            }
+            else
+            {
+                services.AddTransient<IDbService, DebugDbService>();
+            }
             services.AddControllers();
             services.AddSwaggerGen();
         }
@@ -47,19 +58,34 @@ namespace BlasorChat.API
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
-            app.UseSwagger();
-
-            app.UseSwaggerUI(c =>
+            app.MapWhen(context => !context.Request.Path.Value.ToLower().StartsWith("/api") && !context.Request.Path.Value.ToLower().StartsWith("/swagger"), client =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = string.Empty;
+                client.UseBlazorFrameworkFiles();
+                client.UseStaticFiles();
+                client.UseStaticFiles();
+                client.UseRouting();
+
+                client.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                    endpoints.MapFallbackToFile("index.html");
+                });
             });
 
-            app.UseEndpoints(endpoints =>
+            app.MapWhen(context => context.Request.Path.Value.ToLower().StartsWith("/api") || context.Request.Path.Value.ToLower().StartsWith("/swagger"), api =>
             {
-                endpoints.MapControllers();
+                api.UseSwagger();
+                api.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.RoutePrefix = "swagger";
+                });
+                api.UseRouting();
+                api.UseAuthorization();
+                api.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                });
             });
         }
     }
