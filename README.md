@@ -1,4 +1,5 @@
 # BlazorChatWorkshop
 Simple chat project for Blazor Workshop
 
-API address https://api-dot-blazor-chat.ew.r.appspot.com/
+Client address https://blazor-chat-client1.storage.googleapis.com/index.html
+API address https://blazor-chat.ew.r.appspot.com/swagger/index.html
