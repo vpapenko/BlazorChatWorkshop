@@ -8,7 +8,7 @@ Client will be implemented during workshop. You can find final client in [Client
 
 Project is deployed on GCP and will be available for a while.
 
-Client address https://blazor-chat-client1.storage.googleapis.com/index.html
+Client address https://blazor-chat-client.storage.googleapis.com/index.html
 
 API address https://blazor-chat.ew.r.appspot.com/swagger/index.html
 
