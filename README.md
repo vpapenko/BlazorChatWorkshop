@@ -1,4 +1,4 @@
-# BlazorChat Workshop
+# BlazorChat Workshop. C# MVVM from server to browser.
 
 This repository contains a simple chat project for Blazor Wasm Workshop.
 
