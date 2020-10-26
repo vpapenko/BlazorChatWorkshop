@@ -32,7 +32,7 @@ namespace BlasorChat.API.Controllers
                 Text = (string)m["text"],
                 Name = (string)m["name"],
                 Date = (DateTime)m["date"],
-            });
+            }).OrderBy(m => m.Date);
             return messages;
         }
 

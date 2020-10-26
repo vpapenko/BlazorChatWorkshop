@@ -1,32 +1,27 @@
 ﻿@page "/chat"
 @using BlazorChat.ViewModels
-@inject MessageViewModel MessagesView
+@inject MessageViewModel MessageViewModel
 @inject UserViewModel User
 
 <h1>Chat</h1>
 
-@if (MessagesView.Messages == null)
+@if (MessageViewModel.Messages == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <span class="oi oi-loop-circular" aria-hidden="true" @onclick="Refresh"></span>
-
     <div>
         <h3>Name</h3>
         <span class="text-nowrap">
             <input @bind="User.Name" @bind:event="oninput" />
-            @if (string.IsNullOrEmpty(User.Name))
-            {
-                <span>*</span>
-            }
+            <span hidden="@User.UserNameOk">*</span>
         </span>
     </div>
 
     <div>
         <hr />
-        @foreach (var message in MessagesView.Messages.Reverse())
+        @foreach (var message in MessageViewModel.Messages)
         {
             <div>
                 <h3>@message.Text</h3>
@@ -38,28 +33,30 @@ else
         }
     </div>
 
-    <input @bind="newMessage" @bind:event="oninput" @onkeypress="KeyPress" />
+    <input @bind="MessageViewModel.NewMessage" @bind:event="oninput" @onkeypress="KeyPress" />
 }
 
 @code {
-    private string newMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
-        await MessagesView.LoadMessages();
-    }
-
-    private async Task Refresh(MouseEventArgs e)
-    {
-        await MessagesView.LoadMessages();
+        await Task.Run(() =>
+        {
+            MessageViewModel.PropertyChanged += async (sender, e) =>
+            {
+                await InvokeAsync(() =>
+                {
+                    StateHasChanged();
+                });
+            };
+        });
     }
 
     private async Task KeyPress(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter" && !string.IsNullOrEmpty(newMessage) && !string.IsNullOrEmpty(User.Name))
+        if (e.Key == "Enter" && MessageViewModel.MessageCanBeSend)
         {
-            await MessagesView.SendMessage(newMessage, User.Name);
-            newMessage = "";
+            await MessageViewModel.SendMessage(MessageViewModel.NewMessage, User.Name);
         }
     }
 }

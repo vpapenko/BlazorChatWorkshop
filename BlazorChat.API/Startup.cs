@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorChat.API.Hubs;
 using BlazorChat.API.Services;
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -42,6 +44,12 @@ namespace BlasorChat.API
             }
             services.AddControllers();
             services.AddSwaggerGen();
+            services.AddSignalR();
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,6 +82,7 @@ namespace BlasorChat.API
 
             app.MapWhen(context => context.Request.Path.Value.ToLower().StartsWith("/api") || context.Request.Path.Value.ToLower().StartsWith("/swagger"), api =>
             {
+                app.UseResponseCompression();
                 api.UseSwagger();
                 api.UseSwaggerUI(c =>
                 {
@@ -85,6 +94,7 @@ namespace BlasorChat.API
                 api.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();
+                    endpoints.MapHub<ChatHub>("/api/chathub");
                 });
             });
         }
