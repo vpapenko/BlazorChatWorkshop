@@ -61,14 +61,9 @@ namespace BlasorChat.API
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
             app.MapWhen(context => !context.Request.Path.Value.ToLower().StartsWith("/api") && !context.Request.Path.Value.ToLower().StartsWith("/swagger"), client =>
             {
+                client.UseHttpsRedirection();
                 client.UseBlazorFrameworkFiles();
                 client.UseStaticFiles();
                 client.UseStaticFiles();
@@ -83,14 +78,16 @@ namespace BlasorChat.API
 
             app.MapWhen(context => context.Request.Path.Value.ToLower().StartsWith("/api") || context.Request.Path.Value.ToLower().StartsWith("/swagger"), api =>
             {
-                app.UseResponseCompression();
+                api.UseResponseCompression();
+                api.UseHttpsRedirection();
+                api.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+                api.UseRouting();
                 api.UseSwagger();
                 api.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                     c.RoutePrefix = "swagger";
                 });
-                api.UseRouting();
                 api.UseAuthorization();
                 api.UseEndpoints(endpoints =>
                 {
