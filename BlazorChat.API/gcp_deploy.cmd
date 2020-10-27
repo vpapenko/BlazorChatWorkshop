@@ -1,3 +1,3 @@
 dotnet restore
-dotnet publish -c Release
-gcloud app deploy bin\Release\netcoreapp3.1\publish\app.yaml
+dotnet publish
+gcloud app deploy bin\Debug\netcoreapp3.1\publish\app.yaml

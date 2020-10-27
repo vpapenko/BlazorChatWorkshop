@@ -64,18 +64,39 @@ namespace BlasorChat.API
             app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
             app.UseHttpsRedirection();
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = "swagger";
-            });
+
             app.UseRouting();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
+
+            app.MapWhen(context => !context.Request.Path.Value.ToLower().StartsWith("/api") && !context.Request.Path.Value.ToLower().StartsWith("/swagger"), client =>
             {
-                endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/api/chathub");
+                client.UseBlazorFrameworkFiles();
+                client.UseStaticFiles();
+                client.UseStaticFiles();
+                client.UseRouting();
+
+                client.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                    endpoints.MapFallbackToFile("index.html");
+                });
+            });
+
+            app.MapWhen(context => context.Request.Path.Value.ToLower().StartsWith("/api") || context.Request.Path.Value.ToLower().StartsWith("/swagger"), api =>
+            {
+                app.UseResponseCompression();
+                api.UseSwagger();
+                api.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.RoutePrefix = "swagger";
+                });
+                api.UseRouting();
+                api.UseAuthorization();
+                api.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                    endpoints.MapHub<ChatHub>("/api/chathub");
+                });
             });
         }
     }
