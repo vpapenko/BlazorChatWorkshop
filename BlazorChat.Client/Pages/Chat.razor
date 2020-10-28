@@ -26,7 +26,7 @@ else
 
     <div>
         <hr />
-        @foreach (var message in MessageViewModel.Messages)
+        @foreach (var message in MessageViewModel.Messages.Reverse<BlasorChat.Models.Message>())
         {
             <div>
                 <h3>@message.Text</h3>
@@ -37,8 +37,6 @@ else
             </div>
         }
     </div>
-
-    <input @bind="MessageViewModel.NewMessage" @bind:event="oninput" @onkeypress="KeyPress" />
 }
 
 @code {

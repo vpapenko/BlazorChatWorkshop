@@ -31,10 +31,10 @@ namespace BlazorChat.ViewModels
 
         public async Task Init()
         {
-            var messages = await _httpClient.GetFromJsonAsync<Message[]>("https://localhost:5001/api/chat");
+            var messages = await _httpClient.GetFromJsonAsync<Message[]>("https://blazor-chat.ew.r.appspot.com/api/chat");
             Messages.Clear();
             Messages.AddRange(messages);
-            _hubConnection = new HubConnectionBuilder().WithUrl("https://localhost:5001/api/chathub").Build();
+            _hubConnection = new HubConnectionBuilder().WithUrl("https://blazor-chat.ew.r.appspot.com/api/chathub").Build();
 
             _hubConnection.On<Message>("ReceiveMessage", (message) =>
             {
